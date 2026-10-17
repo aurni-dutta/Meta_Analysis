@@ -1,7 +1,7 @@
 """Chen et al.–style meta-analysis tables for the Dashboard.
 
 Builds Tables 1–4 from extracted records:
-  1. Descriptive elasticity stats by product group (income + Marshallian own-price)
+  1. Descriptive elasticity stats by product group (income, own-price, cross-price)
   2. Sample characteristics (% of estimates) + mean real income
   3. Meta-regression (product dummies × ln income + study covariates) with
      Chen variance-equation WLS weighting
@@ -166,35 +166,34 @@ def _desc(vals: List[float]) -> Dict[str, Any]:
 
 
 def table1_summary(rows: List[dict]) -> Dict[str, Any]:
-    """By product group: n/mean/sd/min/max for income and own-price elasticities."""
-    by_group: Dict[str, Dict[str, List[float]]] = {
-        g: {"income": [], "own_price": []} for g in FOOD_GROUPS
-    }
-    ungrouped = {"income": [], "own_price": []}
-    for r in rows:
-        bucket = by_group.get(r["food_group"]) if r["food_group"] else None
-        if r["kind"] == "income":
-            (bucket or ungrouped)["income"].append(r["coefficient"])
-        elif r["kind"] == "own_price":
-            (bucket or ungrouped)["own_price"].append(r["coefficient"])
+    """By product group: n/mean/sd/min/max for income, own-price, and cross-price.
 
-    products = []
-    for g in FOOD_GROUPS:
-        products.append({
-            "product": g,
-            "income": _desc(by_group[g]["income"]),
-            "own_price": _desc(by_group[g]["own_price"]),
-        })
-    if ungrouped["income"] or ungrouped["own_price"]:
-        products.append({
-            "product": "Ungrouped / other",
-            "income": _desc(ungrouped["income"]),
-            "own_price": _desc(ungrouped["own_price"]),
-        })
+    Cross-price rows are grouped by the estimate's own product group
+    (``target_food_group``), the same axis as income and own-price.
+    """
+    kinds = ("income", "own_price", "cross_price")
+    by_group: Dict[str, Dict[str, List[float]]] = {
+        g: {k: [] for k in kinds} for g in FOOD_GROUPS
+    }
+    ungrouped = {k: [] for k in kinds}
+    for r in rows:
+        kind = r["kind"]
+        if kind not in ungrouped:
+            continue
+        bucket = by_group.get(r["food_group"]) if r["food_group"] else None
+        (bucket or ungrouped)[kind].append(r["coefficient"])
+
+    def pack(src: Dict[str, List[float]]) -> Dict[str, Any]:
+        return {k: _desc(src[k]) for k in kinds}
+
+    products = [{"product": g, **pack(by_group[g])} for g in FOOD_GROUPS]
+    if any(ungrouped[k] for k in kinds):
+        products.append({"product": "Ungrouped / other", **pack(ungrouped)})
     return {
         "products": products,
         "n_income": sum(1 for r in rows if r["kind"] == "income"),
         "n_own_price": sum(1 for r in rows if r["kind"] == "own_price"),
+        "n_cross_price": sum(1 for r in rows if r["kind"] == "cross_price"),
     }
 
 

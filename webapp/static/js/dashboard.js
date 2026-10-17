@@ -61,28 +61,27 @@ function renderMeta(d) {
   dashMeta.innerHTML = bits.map(b => `<span class="dash-meta-chip">${escapeHtml(b)}</span>`).join('');
 }
 
+function descCells(d) {
+  d = d || {};
+  return `<td>${d.n || 0}</td>
+      <td>${fmtNum(d.mean)}</td>
+      <td>${fmtNum(d.sd)}</td>
+      <td>${fmtNum(d.min)}</td>
+      <td>${fmtNum(d.max)}</td>`;
+}
+
 function renderTable1(t1) {
   if (!t1 || !(t1.products || []).length) {
     table1Wrap.innerHTML = '<div class="manuscript-empty"><div class="big">No elasticity estimates</div><div>Run Main AI extraction first.</div></div>';
     return;
   }
-  const rows = t1.products.map(p => {
-    const inc = p.income || {};
-    const own = p.own_price || {};
-    return `<tr>
+  const rows = t1.products.map(p => `
+    <tr>
       <td>${escapeHtml(p.product)}</td>
-      <td>${inc.n || 0}</td>
-      <td>${fmtNum(inc.mean)}</td>
-      <td>${fmtNum(inc.sd)}</td>
-      <td>${fmtNum(inc.min)}</td>
-      <td>${fmtNum(inc.max)}</td>
-      <td>${own.n || 0}</td>
-      <td>${fmtNum(own.mean)}</td>
-      <td>${fmtNum(own.sd)}</td>
-      <td>${fmtNum(own.min)}</td>
-      <td>${fmtNum(own.max)}</td>
-    </tr>`;
-  }).join('');
+      ${descCells(p.income)}
+      ${descCells(p.own_price)}
+      ${descCells(p.cross_price)}
+    </tr>`).join('');
   table1Wrap.innerHTML = `
     <table class="chen-table">
       <thead>
@@ -90,15 +89,17 @@ function renderTable1(t1) {
           <th rowspan="2">Product group</th>
           <th colspan="5">Income elasticity</th>
           <th colspan="5">Own-price elasticity</th>
+          <th colspan="5">Cross-price elasticity</th>
         </tr>
         <tr>
+          <th>n</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th>
           <th>n</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th>
           <th>n</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="chen-footnote">Income estimates: ${t1.n_income || 0}; own-price estimates: ${t1.n_own_price || 0}.</div>`;
+    <div class="chen-footnote">Income estimates: ${t1.n_income || 0}; own-price estimates: ${t1.n_own_price || 0}; cross-price estimates: ${t1.n_cross_price || 0}.</div>`;
 }
 
 function renderTable2(t2) {

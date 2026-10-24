@@ -169,7 +169,11 @@ def _load_json(path: Path, default):
 
 
 def _write_json(path: Path, data) -> None:
-    path.write_text(json.dumps(data, indent=2))
+    # Atomic replace: the webapp polls records.json / chunks_kept.json while
+    # this job rewrites them, and a reader must never see a half-written file.
+    tmp = path.with_suffix(path.suffix + f".tmp{os.getpid()}")
+    tmp.write_text(json.dumps(data, indent=2))
+    os.replace(tmp, path)
 
 
 def progress_path(project_id: str, stage: str) -> Path:

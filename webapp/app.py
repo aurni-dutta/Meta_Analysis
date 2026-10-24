@@ -340,7 +340,7 @@ def _discard_extraction_results() -> None:
             changed = True
     if changed:
         _save_kept_chunks(chunks)
-    (OUTPUT_DIR / "records.json").write_text(json.dumps([], indent=2))
+    _write_json((OUTPUT_DIR / "records.json"), [])
 
 
 def _discard_detection_results() -> None:
@@ -509,7 +509,7 @@ def save_targets():
     data = request.get_json(force=True)
     elasticities = [e.strip() for e in data.get("elasticities", []) if e.strip()]
     products = [p.strip() for p in data.get("products", []) if p.strip()]
-    TARGETS_PATH.write_text(json.dumps({"elasticities": elasticities, "products": products}, indent=2))
+    _write_json(TARGETS_PATH, {"elasticities": elasticities, "products": products})
     return jsonify({"elasticities": elasticities, "products": products})
 
 
@@ -581,9 +581,25 @@ def analyze_stop():
 # Results: per-paper chunk markup (kept vs. dropped by the heuristic filter)
 # --------------------------------------------------------------------------- #
 def _load_json(path: Path, default):
-    if path.exists():
-        return json.loads(path.read_text())
-    return default
+    if not path.exists():
+        return default
+    # Brief retry covers a writer that predates atomic writes. Never fall back
+    # to `default` on a parse error: mutating endpoints would write it back
+    # and wipe the real file.
+    for attempt in range(5):
+        try:
+            return json.loads(path.read_text())
+        except json.JSONDecodeError:
+            if attempt == 4:
+                raise
+            time.sleep(0.1)
+
+
+def _write_json(path: Path, data) -> None:
+    """Atomic replace so a concurrent reader never sees a partial file."""
+    tmp = path.with_suffix(path.suffix + f".tmp{os.getpid()}")
+    tmp.write_text(json.dumps(data, indent=2))
+    os.replace(tmp, path)
 
 
 @app.route("/api/results/papers", methods=["GET"])
@@ -638,7 +654,7 @@ def _purge_records_for_chunk(chunk_id: str) -> None:
     records = _load_json(OUTPUT_DIR / "records.json", [])
     filtered = [r for r in records if r.get("source_chunk_id") != chunk_id]
     if len(filtered) != len(records):
-        (OUTPUT_DIR / "records.json").write_text(json.dumps(filtered, indent=2))
+        _write_json((OUTPUT_DIR / "records.json"), filtered)
 
 
 @app.route("/api/results/papers/<paper_id>/chunks/<path:chunk_id>/override", methods=["POST"])
@@ -662,7 +678,7 @@ def results_chunk_override(paper_id, chunk_id):
 
     chunk["passes_filter"] = passes_filter
     chunk["filter_reason"] = "manual_include" if passes_filter else "manual_exclude"
-    (OUTPUT_DIR / "chunks.json").write_text(json.dumps(all_chunks, indent=2))
+    _write_json((OUTPUT_DIR / "chunks.json"), all_chunks)
 
     kept = _kept_chunks()
     existing = _find_chunk(kept, chunk_id)
@@ -809,7 +825,7 @@ def _kept_chunks() -> list:
 
 
 def _save_kept_chunks(chunks: list) -> None:
-    (OUTPUT_DIR / "chunks_kept.json").write_text(json.dumps(chunks, indent=2))
+    _write_json((OUTPUT_DIR / "chunks_kept.json"), chunks)
 
 
 def _classifiable_chunks(chunks: list) -> list:
@@ -1242,12 +1258,17 @@ _CSV_COLUMNS = [
 
 
 def _record_to_csv_row(r: dict) -> dict:
-    ci = r.get("confidence_interval") or []
+    ci = r.get("confidence_interval")
+    ci = ci if isinstance(ci, (list, tuple)) else []
     tp = r.get("time_period") or {}
     ts = r.get("test_statistic") or {}
     loc = r.get("source_location") or {}
     reasons = r.get("review_reason") or []
+    if isinstance(reasons, str):
+        reasons = [reasons]
     pages = r.get("pages_used") or []
+    if not isinstance(pages, (list, tuple)):
+        pages = [pages]
     return {
         "estimate_id": r.get("estimate_id"),
         "paper_id": r.get("paper_id"),
@@ -1446,7 +1467,7 @@ def main_ai_add_record():
     records = _load_json(OUTPUT_DIR / "records.json", [])
     rec = _blank_record(data.get("paper_id"))
     records.append(rec)
-    (OUTPUT_DIR / "records.json").write_text(json.dumps(records, indent=2))
+    _write_json((OUTPUT_DIR / "records.json"), records)
     return jsonify({"record": rec})
 
 
@@ -1459,7 +1480,7 @@ def main_ai_delete_record(estimate_id):
     kept = [r for r in records if r.get("estimate_id") != estimate_id]
     if len(kept) == len(records):
         return jsonify({"error": "record not found"}), 404
-    (OUTPUT_DIR / "records.json").write_text(json.dumps(kept, indent=2))
+    _write_json((OUTPUT_DIR / "records.json"), kept)
     return jsonify({"ok": True})
 
 
@@ -1539,7 +1560,7 @@ def main_ai_update_record(estimate_id):
     # Recompute Chen missing-data review flags after edits (e.g. filling income
     # or budget share should clear those auto-reasons).
     LLMClient._apply_chen_review_flags(rec)
-    (OUTPUT_DIR / "records.json").write_text(json.dumps(records, indent=2))
+    _write_json((OUTPUT_DIR / "records.json"), records)
     return jsonify({"record": rec})
 
 
@@ -1685,7 +1706,7 @@ def main_ai_dedupe():
     records = _load_json(OUTPUT_DIR / "records.json", [])
     deduped, removed = _dedupe_rounded_records(records)
     if removed:
-        (OUTPUT_DIR / "records.json").write_text(json.dumps(deduped, indent=2))
+        _write_json((OUTPUT_DIR / "records.json"), deduped)
     return jsonify({"removed": removed, "records": len(deduped)})
 
 
@@ -1731,7 +1752,7 @@ def _load_regression_runs() -> list:
 
 
 def _save_regression_runs(runs: list) -> None:
-    (OUTPUT_DIR / "regression_runs.json").write_text(json.dumps(runs, indent=2))
+    _write_json((OUTPUT_DIR / "regression_runs.json"), runs)
 
 
 @app.route("/api/regression/fields", methods=["GET"])

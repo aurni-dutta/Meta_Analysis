@@ -588,6 +588,16 @@ function finishExtractUI(finalProgress) {
   }
 }
 
+// The job's outcome comes from the progress file; a failed table refresh
+// must not be reported as a failed extraction.
+async function refreshViews() {
+  try {
+    await Promise.all([loadPapers(), loadRecords()]);
+  } catch (e) {
+    console.warn('Main AI view refresh failed:', e);
+  }
+}
+
 // Extraction runs in a detached subprocess (see stage_jobs / job_runner).
 // POST only starts the job; progress file is the source of truth — poll
 // until running:false. Survives proxy timeouts and model latency changes.
@@ -603,7 +613,7 @@ async function pollUntilExtractionDone() {
       continue;
     }
     applyExtractProgress(p);
-    await Promise.all([loadPapers(), loadRecords()]);
+    await refreshViews();
     if (!p.running) return p;
     await new Promise(r => setTimeout(r, 1500));
   }
@@ -622,16 +632,15 @@ async function attachToRunningExtraction() {
   try {
     const finalProgress = await pollUntilExtractionDone();
     finishExtractUI(finalProgress);
-    await Promise.all([loadPapers(), loadRecords()]);
   } catch (e) {
     hideProgressBar();
     pauseBtn.hidden = true;
-  stopBtn.hidden = true;
-    extractStatus.textContent = 'Extraction failed — check the server log.';
+    stopBtn.hidden = true;
+    extractStatus.textContent = `Extraction failed — check the server log. (${e.message || e})`;
     extractStatus.classList.remove('busy');
     extractBtn.disabled = false;
-    await Promise.all([loadPapers(), loadRecords()]);
   }
+  await refreshViews();
 }
 
 
@@ -686,30 +695,29 @@ extractBtn.addEventListener('click', async () => {
       if (res.status === 409) {
         const finalProgress = await pollUntilExtractionDone();
         finishExtractUI(finalProgress);
-        await Promise.all([loadPapers(), loadRecords()]);
+        await refreshViews();
         return;
       }
       hideProgressBar();
       pauseBtn.hidden = true;
-  stopBtn.hidden = true;
+      stopBtn.hidden = true;
       extractStatus.textContent = data.error || 'Extraction failed.';
       extractStatus.classList.remove('busy');
       extractBtn.disabled = false;
-      await Promise.all([loadPapers(), loadRecords()]);
+      await refreshViews();
       return;
     }
     const finalProgress = await pollUntilExtractionDone();
     finishExtractUI(finalProgress);
-    await Promise.all([loadPapers(), loadRecords()]);
   } catch (e) {
     hideProgressBar();
     pauseBtn.hidden = true;
-  stopBtn.hidden = true;
-    extractStatus.textContent = 'Extraction failed — check the server log.';
+    stopBtn.hidden = true;
+    extractStatus.textContent = `Extraction failed — check the server log. (${e.message || e})`;
     extractStatus.classList.remove('busy');
     extractBtn.disabled = false;
-    await Promise.all([loadPapers(), loadRecords()]);
   }
+  await refreshViews();
 });
 
 async function loadFoodGroups() {

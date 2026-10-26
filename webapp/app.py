@@ -434,6 +434,10 @@ def dashboard_page():
     locked = _locked_response("dashboard", "Dashboard")
     return locked or render_template("dashboard.html")
 
+@app.route("/food-demand")
+def food_demand_page():
+    return render_template("food_demand.html")
+
 
 # ------------------------------------------------------------
 # Food-demand scenario API
@@ -459,7 +463,6 @@ def simulate_food_demand():
     shock = data.get("shock")
 
     # Start with own-price and income scenarios.
-    # We'll add cross-price and tariffs after verifying the basics.
     workbook_names = {
         "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
         "Ghana": "GHANA_FOOD_RESULTS.xlsx",
@@ -518,6 +521,120 @@ def simulate_food_demand():
             "change_percent": None,
             "error": "No elasticity estimate available"
         })
+
+
+@app.route("/api/food-demand/simulate-all", methods=["POST"])
+def simulate_all_food_groups():
+    """Return workbook-based predictions for every food group."""
+
+    import os
+    from pathlib import Path
+    from food_demand import load_food_group_data, predict_quantity
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Expected a JSON object"}), 400
+
+    country = data.get("country")
+    scenario = data.get("scenario")
+    shock = data.get("shock")
+
+    workbook_names = {
+        "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
+        "Ghana": "GHANA_FOOD_RESULTS.xlsx",
+        "South Africa": "SOUTH_AFRICA_FOOD_RESULTS.xlsx",
+    }
+
+    food_groups = [
+        "Grains and vegetables",
+        "Meat and eggs",
+        "Edible oil",
+        "Aquatic products",
+        "Fruits",
+        "Sugar",
+        "Dairy",
+        "Alcohol",
+        "Ungrouped / other",
+    ]
+
+    if country not in workbook_names:
+        return jsonify({"error": "Unsupported country"}), 400
+
+    if scenario not in ("own", "income"):
+        return jsonify({"error": "Unsupported scenario"}), 400
+
+    if (
+        isinstance(shock, bool)
+        or not isinstance(shock, (int, float))
+        or not -0.30 <= shock <= 0.30
+    ):
+        return jsonify({"error": "Invalid shock"}), 400
+
+    workbook_dir = os.environ.get("FOOD_DEMAND_WORKBOOK_DIR")
+
+    if not workbook_dir:
+        return jsonify({"error": "Workbook directory not configured"}), 503
+
+    workbook_path = Path(workbook_dir) / workbook_names[country]
+
+    if not workbook_path.is_file():
+        return jsonify({"error": "Country workbook not found"}), 503
+
+    results = []
+
+    try:
+        for group in food_groups:
+            food = load_food_group_data(workbook_path, group)
+
+            baseline = food["baseline_g_day"]
+
+            elasticity = (
+                food["own_price_elasticity"]
+                if scenario == "own"
+                else food["income_elasticity"]
+            )
+
+            # A missing elasticity is not a zero elasticity.
+            if elasticity is None:
+                predicted = None
+                change_percent = None
+            else:
+                predicted = predict_quantity(
+                    baseline,
+                    elasticity,
+                    shock
+                )
+                change_percent = elasticity * shock * 100
+
+            results.append({
+                "food_group": group,
+                "baseline_g_day": round(baseline, 2),
+                "predicted_g_day": (
+                    round(predicted, 2)
+                    if predicted is not None
+                    else None
+                ),
+                "elasticity": elasticity,
+                "change_percent": (
+                    round(change_percent, 2)
+                    if change_percent is not None
+                    else None
+                ),
+            })
+
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    except (OSError, KeyError):
+        return jsonify({"error": "Unable to read workbook"}), 500
+
+    return jsonify({
+        "country": country,
+        "scenario": scenario,
+        "shock": shock,
+        "food_groups": results,
+    })
 
     baseline = food["baseline_g_day"]
     predicted = predict_quantity(baseline, elasticity, shock)

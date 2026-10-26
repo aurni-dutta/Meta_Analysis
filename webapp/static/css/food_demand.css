@@ -1,0 +1,177 @@
+/* MetaExtract colours */
+    :root {
+      --blue: #2563eb;
+      --orange: #d77a42;
+      --green: #6a9f40;
+      --text: #18181b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --background: #fafafa;
+    }
+
+    * { box-sizing: border-box; }
+
+
+    /* Main layout */
+    .food-demand-page { max-width: 1390px; margin: auto; padding: 32px 22px 64px; }
+    .food-demand-page h1 { margin: 0 0 20px; font-size: 29px; letter-spacing: -.6px; }
+    .food-demand-page h2 { margin: 0 0 5px; font-size: 19px; }
+    .layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+    /* Keep scenario controls visible while scrolling */
+    .layout > aside {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 23px;
+      box-shadow: 0 1px 3px #00000008;
+    }
+    [hidden] { display: none !important; }
+    .field { margin-bottom: 22px; }
+    .field:last-child { margin-bottom: 0; }
+    .food-demand-page label { display: block; margin-bottom: 7px; font-weight: 700; font-size: 13px; }
+    .food-demand-page select {
+      width: 100%;
+      padding: 11px 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+    .food-demand-page input[type="range"] { width: 100%; accent-color: var(--blue); }
+    .field-line { display: flex; justify-content: space-between; align-items: center; }
+    .field-line strong { font-variant-numeric: tabular-nums; }
+
+    /* Scenario tabs and chart legend */
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 21px; }
+    .tabs button {
+      padding: 10px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .tabs button.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .food-demand-page button:focus-visible, .food-demand-page select:focus-visible, .food-demand-page input:focus-visible {
+      outline: 2px solid #93c5fd;
+      outline-offset: 2px;
+    }
+    .subtitle { color: var(--muted); margin: 0 0 14px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 20px; }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; color: #52525b; }
+    .swatch { width: 13px; height: 13px; display: inline-block; border-radius: 3px; }
+    .orange { background: var(--orange); }
+    .blue { background: var(--blue); }
+    .green { background: var(--green); }
+
+    /* Three grouped bars per food category */
+    .chart-scroll { overflow-x: auto; }
+    .plot {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      min-width: 600px;
+      height: 320px;
+      padding: 18px 6px 0;
+      border-bottom: 2px solid #a1a1aa;
+    }
+    .plot::before {
+      content: "";
+      position: absolute;
+      inset: 18px 0 0;
+      background: repeating-linear-gradient(
+        to top, transparent 0, transparent calc(25% - 1px), #f4f4f5 25%
+      );
+      pointer-events: none;
+    }
+    .category {
+      position: relative;
+      flex: 1;
+      min-width: 76px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .bar-group {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      height: 100%;
+    }
+    .bar {
+      width: 27%;
+      max-width: 34px;
+      min-height: 2px;
+      border-radius: 5px 5px 0 0;
+      transition: height .25s ease;
+    }
+    .xlabels {
+      display: flex;
+      gap: 12px;
+      min-width: 600px;
+      padding: 11px 6px 0;
+    }
+    .xlabels div {
+      flex: 1;
+      min-width: 76px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .caption { margin-top: 18px; color: var(--muted); font-size: 12px; }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .food-demand-page { padding: 20px 12px; }
+      .card { padding: 18px; }
+    }
+
+
+    /* Nutrient impact: diverging percentage-change bars */
+    .visualizations { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .nutrient-chart { display: flex; flex-direction: column; gap: 13px; margin-top: 10px; }
+    .nutrient-row.highlighted { background: #eff6ff; outline: 1px solid #bfdbfe; border-radius: 8px; padding: 5px; margin: -5px; }
+    .nutrient-focus { margin-top: 18px; padding: 10px 14px; border-radius: 8px; background: #eff6ff; color: #1d4ed8; font-weight: 650; }
+    .field .caption { margin-top: 7px; }
+    .nutrient-axis { display: flex; justify-content: space-between; padding-left: 165px; padding-right: 76px; font-size: 11px; color: var(--muted); }
+    .nutrient-row { display: grid; grid-template-columns: 148px minmax(0,1fr) 65px; gap: 15px; align-items: center; }
+    .nutrient-label { font-weight: 600; font-size: 13px; }
+    .nutrient-track { position: relative; height: 21px; border-radius: 5px; background: #f4f4f5; overflow: hidden; }
+    .nutrient-zero { position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed #a1a1aa; }
+    .nutrient-fill { position: absolute; top: 0; bottom: 0; width: 0; background: var(--blue); transition: left .25s, width .25s; }
+    .nutrient-fill.loss { background: var(--orange); }
+    .nutrient-value { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+    @media (max-width: 640px) {
+      .nutrient-row { grid-template-columns: 95px minmax(0,1fr) 54px; gap: 8px; }
+      .nutrient-axis { padding-left: 104px; padding-right: 62px; }
+    }
+  
+    /* Selected nutrient response curve */
+    .curve-wrap { margin-top: 20px; width: 100%; }
+    .curve-wrap svg { width: 100%; height: auto; display: block; }
+    .curve-current { margin-top: 8px; color: #1d4ed8; font-weight: 650; font-size: 13px; }

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Demand Scenarios · MetaExtract</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/food_demand.css') }}">
+</head>
+<body>
+  {% set nav_active = 'food_demand' %}
+  {% include '_header.html' %}
+
+  <main class="food-demand-page">
+    <h1>Food demand dashboard</h1>
+
+    <div class="layout">
+      <aside class="card">
+        <div class="field">
+          <label for="country">Country</label>
+          <select id="country">
+            <option value="Nigeria">Nigeria</option>
+            <option value="Ghana">Ghana (layout preview)</option>
+            <option value="South Africa">South Africa (layout preview)</option>
+          </select>
+          <p class="caption">Country selection previews the interface; country-specific model data is not connected.</p>
+        </div>
+        <div class="field" id="foodGroupField">
+          <label for="foodGroup">Food group affected by price change</label>
+          <select id="foodGroup">
+            <option>Fruits &amp; vegetables</option>
+            <option>Meats</option>
+            <option>Grains</option>
+            <option>Dairy</option>
+            <option>Fats &amp; oils</option>
+            <option>Seafood</option>
+          </select>
+        </div>
+        <div class="field" id="passThroughField" hidden>
+          <label for="passThrough">Tariff pass-through</label>
+          <input id="passThrough" type="range" min="0" max="100" step="5" value="100">
+          <div class="field-line"><small>Share reaching shoppers</small><strong id="passThroughText">100%</strong></div>
+        </div>
+        <div class="field">
+          <label for="nutrientSelect">Nutrient to highlight</label>
+          <select id="nutrientSelect">
+            <option>Energy</option><option>Protein</option><option>Fat</option>
+            <option>Iron</option><option>Zinc</option><option>Vitamin A</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-line">
+            <label for="shock" id="shockLabel">Price change</label>
+            <strong id="shockText">+10%</strong>
+          </div>
+          <input id="shock" type="range" min="-30" max="30" step="1" value="10">
+        </div>
+      </aside>
+
+      <div class="visualizations">
+      <section class="card">
+        <div class="tabs" aria-label="Chart view">
+          <button type="button" class="active" data-view="own">Own-price</button>
+          <button type="button" data-view="cross">Cross-price</button>
+          <button type="button" data-view="income">Income</button>
+          <button type="button" data-view="tariff">Tariff</button>
+        </div>
+
+        <h2 id="chartTitle">Own-price scenario</h2>
+        <p class="subtitle">FAO food supply and modeled quantities by food group (g/person/day)</p>
+
+        <div class="legend" aria-label="Chart legend">
+          <span><i class="swatch orange"></i>FAO baseline supply</span>
+          <span><i class="swatch blue"></i>Predicted supply</span>
+        </div>
+
+        <div class="chart-scroll">
+          <div class="plot" id="plot" role="img" aria-label="Illustrative grouped food consumption chart"></div>
+          <div class="xlabels" id="labels"></div>
+        </div>
+
+        <p class="caption">
+          Illustrative values only — not observed data, official dietary targets, or
+          validated model predictions.
+        </p>
+        <p class="caption" id="scenarioNote" aria-live="polite"></p>
+      </section>
+
+      <!-- Second visualization: six nutrient outcomes from Andrew's framework.
+           Values are deliberately illustrative until workbook calculations are integrated. -->
+      <section class="card nutrient-card">
+        <h2>Nutrient impact</h2>
+        <p class="subtitle">Illustrative percentage changes in national food supply nutrients</p>
+        <div class="nutrient-axis"><span>Decrease</span><span>0%</span><span>Increase</span></div>
+        <div id="nutrientChart" class="nutrient-chart" aria-label="Illustrative nutrient change bars"></div>
+        <div class="nutrient-focus" id="nutrientFocus" aria-live="polite"></div>
+        <p class="caption">Animation-only demo. Energy, protein, fat, iron, zinc and vitamin A follow Andrew's nutrient categories; displayed changes are not workbook results.</p>
+      </section>
+
+      <!-- How the selected nutrient responds across the full shock range. -->
+      <section class="card nutrient-card">
+        <h2>Selected nutrient response curve</h2>
+        <p class="subtitle" id="curveSubtitle">Energy response from −30% to +30%</p>
+        <div class="curve-wrap">
+          <svg id="responseCurve" viewBox="0 0 760 280" role="img"
+               aria-label="Illustrative nutrient response curve"></svg>
+        </div>
+        <div class="curve-current" id="curveCurrent" aria-live="polite"></div>
+        <p class="caption">
+          Illustrative response across shock sizes, not calculated from Andrew's workbook.
+          The blue dot marks the current slider value.
+        </p>
+      </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/nav_state.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/food_demand.js') }}"></script>
+</body>
+</html>

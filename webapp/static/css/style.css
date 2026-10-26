@@ -1909,3 +1909,101 @@ select.edit-input {
 .chen-table .reg-stats tr:not(:first-child) td { border-top: none; }
 
 .dash-filter-empty { font-size: var(--text-sm); color: var(--text-dim); }
+
+
+/* -------------------------------------------------------
+   Food Demand Scenarios
+   ------------------------------------------------------- */
+
+.fd-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.fd-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.fd-controls select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d5deea;
+  border-radius: 8px;
+  background: #fff;
+  color: #24344a;
+  font: inherit;
+}
+
+.fd-shock-control {
+  margin-top: 28px;
+}
+
+.fd-shock-control label {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.fd-shock-control input {
+  width: 100%;
+  cursor: pointer;
+  accent-color: #4c82ce;
+}
+
+#fd-status {
+  min-height: 20px;
+  font-size: 13px;
+  color: #64748b;
+  margin: 18px 0;
+}
+
+.fd-bar-row {
+  margin: 22px 0;
+}
+
+.fd-bar-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+  font-size: 14px;
+}
+
+.fd-track {
+  width: 100%;
+  height: 24px;
+  border-radius: 6px;
+  background: #eaf0f7;
+  overflow: hidden;
+}
+
+.fd-bar {
+  height: 100%;
+  width: 0;
+  border-radius: 6px;
+  transition: width 180ms ease;
+}
+
+.fd-baseline {
+  background: #e9a052;
+}
+
+.fd-predicted {
+  background: #5388cc;
+}
+
+.fd-change {
+  margin-top: 24px;
+  font-size: 15px;
+}
+
+@media (max-width: 700px) {
+  .fd-controls {
+    grid-template-columns: 1fr;
+  }
+}

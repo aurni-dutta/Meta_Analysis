@@ -435,6 +435,105 @@ def dashboard_page():
     return locked or render_template("dashboard.html")
 
 
+# ------------------------------------------------------------
+# Food-demand scenario API
+# ------------------------------------------------------------
+
+@app.route("/api/food-demand/simulate", methods=["POST"])
+def simulate_food_demand():
+    """Calculate a food-demand scenario using Andrew's workbook."""
+
+    import os
+    from pathlib import Path
+    from food_demand import load_food_group_data, predict_quantity
+
+    # Read the settings submitted by the dashboard.
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Expected a JSON object"}), 400
+
+    country = data.get("country")
+    scenario = data.get("scenario")
+    food_group = data.get("food_group")
+    shock = data.get("shock")
+
+    # Start with own-price and income scenarios.
+    # We'll add cross-price and tariffs after verifying the basics.
+    workbook_names = {
+        "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
+        "Ghana": "GHANA_FOOD_RESULTS.xlsx",
+        "South Africa": "SOUTH_AFRICA_FOOD_RESULTS.xlsx",
+    }
+
+    if country not in workbook_names:
+        return jsonify({"error": "Unsupported country"}), 400
+
+    if scenario not in ("own", "income"):
+        return jsonify({"error": "Scenario not implemented yet"}), 400
+
+    if not isinstance(food_group, str) or not food_group.strip():
+        return jsonify({"error": "Food group is required"}), 400
+
+    if isinstance(shock, bool) or not isinstance(shock, (int, float)):
+        return jsonify({"error": "Shock must be a number"}), 400
+
+    # Shock is expressed as a fraction: 0.10 means +10%.
+    if not -0.30 <= shock <= 0.30:
+        return jsonify({"error": "Shock must be between -0.30 and 0.30"}), 400
+
+    workbook_dir = os.environ.get("FOOD_DEMAND_WORKBOOK_DIR")
+
+    if not workbook_dir:
+        return jsonify({"error": "Workbook directory not configured"}), 503
+
+    workbook_path = Path(workbook_dir) / workbook_names[country]
+
+    if not workbook_path.is_file():
+        return jsonify({"error": "Country workbook not found"}), 503
+
+    try:
+        food = load_food_group_data(workbook_path, food_group)
+
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    except (OSError, KeyError):
+        return jsonify({"error": "Unable to read workbook data"}), 500
+
+    elasticity = (
+        food["own_price_elasticity"]
+        if scenario == "own"
+        else food["income_elasticity"]
+    )
+
+    # Missing elasticity is NOT equivalent to zero.
+    if elasticity is None:
+        return jsonify({
+            "country": country,
+            "food_group": food_group,
+            "scenario": scenario,
+            "baseline_g_day": food["baseline_g_day"],
+            "predicted_g_day": None,
+            "change_percent": None,
+            "error": "No elasticity estimate available"
+        })
+
+    baseline = food["baseline_g_day"]
+    predicted = predict_quantity(baseline, elasticity, shock)
+
+    return jsonify({
+        "country": country,
+        "food_group": food_group,
+        "scenario": scenario,
+        "shock": shock,
+        "elasticity": elasticity,
+        "baseline_g_day": round(baseline, 2),
+        "predicted_g_day": round(predicted, 2),
+        "change_percent": round(elasticity * shock * 100, 2),
+    })
+
+
 @app.route("/settings")
 def settings_page():
     return render_template("settings.html")

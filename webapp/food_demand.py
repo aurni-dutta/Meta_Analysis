@@ -83,3 +83,121 @@ def load_food_group_data(workbook_path, food_group):
 
     finally:
         workbook.close()
+
+
+def calculate_nutrient_changes(workbook_path, scenario, shock):
+    """
+    Calculate national food-supply nutrient changes.
+
+    Uses the proportional nutrient-supply method documented
+    in Andrew's workbook.
+
+    shock: fractional change, e.g. 0.10 for +10%.
+    """
+    if scenario not in ("own", "income"):
+        raise ValueError("Unsupported nutrient scenario")
+
+    if isinstance(shock, bool) or not isinstance(shock, (int, float)):
+        raise ValueError("Shock must be numeric")
+
+    if not -0.30 <= shock <= 0.30:
+        raise ValueError("Shock must be between -0.30 and 0.30")
+
+    nutrient_columns = {
+        "Energy": 3,
+        "Protein": 4,
+        "Fat": 5,
+        "Iron": 12,
+        "Zinc": 13,
+        "Vitamin A": 14,
+    }
+
+    workbook = load_workbook(
+        workbook_path,
+        read_only=True,
+        data_only=True
+    )
+
+    try:
+        elasticity_sheet = workbook["TABLE 1 ELASTICITY"]
+        consumption_sheet = workbook["TABLE 2 CONSUMPTION"]
+
+        elasticities = {}
+
+        for row in elasticity_sheet.iter_rows(
+            min_row=5,
+            values_only=True
+        ):
+            group = row[0]
+            column = 12 if scenario == "own" else 11
+            elasticity = row[column]
+
+            if isinstance(group, str) and isinstance(
+                elasticity, (int, float)
+            ):
+                elasticities[group] = elasticity
+
+        changes = {
+            nutrient: 0.0
+            for nutrient in nutrient_columns
+        }
+
+        totals = {}
+        missing_groups = []
+
+        for row in consumption_sheet.iter_rows(
+            min_row=3,
+            values_only=True
+        ):
+            group = row[0]
+
+            if group == "Total (all groups)":
+                totals = {
+                    nutrient: row[index]
+                    for nutrient, index in nutrient_columns.items()
+                }
+                continue
+
+            if not isinstance(group, str):
+                continue
+
+            if group not in elasticities:
+                if group not in (
+                    "FAO Grand Total ",
+                    "Tobacco"
+                ) and isinstance(row[2], (int, float)) and row[2] > 0:
+                    missing_groups.append(group)
+                continue
+
+            quantity_change = elasticities[group] * shock
+
+            for nutrient, index in nutrient_columns.items():
+                baseline = row[index]
+
+                if isinstance(baseline, (int, float)):
+                    changes[nutrient] += baseline * quantity_change
+
+        results = {}
+
+        for nutrient in nutrient_columns:
+            total = totals.get(nutrient)
+
+            if not isinstance(total, (int, float)) or total <= 0:
+                raise ValueError(
+                    f"Invalid national baseline: {nutrient}"
+                )
+
+            results[nutrient] = round(
+                changes[nutrient] / total * 100,
+                4
+            )
+
+        return {
+            "scenario": scenario,
+            "shock": shock,
+            "nutrient_changes_percent": results,
+            "missing_elasticity_groups": missing_groups,
+        }
+
+    finally:
+        workbook.close()

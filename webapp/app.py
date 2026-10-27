@@ -651,6 +651,71 @@ def simulate_all_food_groups():
     })
 
 
+@app.route("/api/food-demand/nutrients", methods=["POST"])
+def simulate_food_demand_nutrients():
+    """Return workbook-based national nutrient changes."""
+
+    import os
+    from pathlib import Path
+    from food_demand import calculate_nutrient_changes
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Expected a JSON object"}), 400
+
+    country = data.get("country")
+    scenario = data.get("scenario")
+    shock = data.get("shock")
+
+    workbook_names = {
+        "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
+        "Ghana": "GHANA_FOOD_RESULTS.xlsx",
+        "South Africa": "SOUTH_AFRICA_FOOD_RESULTS.xlsx",
+    }
+
+    if country not in workbook_names:
+        return jsonify({"error": "Unsupported country"}), 400
+
+    if scenario not in ("own", "income"):
+        return jsonify({"error": "Scenario not available"}), 400
+
+    if (
+        isinstance(shock, bool)
+        or not isinstance(shock, (int, float))
+        or not -0.30 <= shock <= 0.30
+    ):
+        return jsonify({"error": "Invalid shock"}), 400
+
+    workbook_dir = os.environ.get("FOOD_DEMAND_WORKBOOK_DIR")
+
+    if not workbook_dir:
+        return jsonify({"error": "Workbook directory not configured"}), 503
+
+    workbook_path = Path(workbook_dir) / workbook_names[country]
+
+    if not workbook_path.is_file():
+        return jsonify({"error": "Country workbook not found"}), 503
+
+    try:
+        result = calculate_nutrient_changes(
+            workbook_path,
+            scenario,
+            shock
+        )
+
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    except (OSError, KeyError):
+        return jsonify({"error": "Unable to read nutrient data"}), 500
+
+    return jsonify({
+        "country": country,
+        **result
+    })
+
+
 @app.route("/settings")
 def settings_page():
     return render_template("settings.html")

@@ -109,3 +109,114 @@ document.querySelectorAll("[data-view]").forEach(button => {
 
 // Initial workbook-backed nutrient result.
 refreshWorkbookNutrients();
+
+
+async function refreshWorkbookResponseCurve() {
+  const curve = document.getElementById("responseCurve");
+  const subtitle = document.getElementById("curveSubtitle");
+  const currentLabel = document.getElementById("curveCurrent");
+
+  const country = document.getElementById("country").value;
+  const nutrient = document.getElementById("nutrientSelect").value;
+  const shock = Number(document.getElementById("shock").value);
+
+  if (selectedView !== "own" && selectedView !== "income") {
+    curve.replaceChildren();
+    currentLabel.textContent =
+      "Workbook response curve unavailable for this scenario.";
+    return;
+  }
+
+  subtitle.textContent =
+    `${nutrient}: modeled national nutrient-supply change from −30% to +30%`;
+
+  // This model is linear in the shock. The API result at +10%
+  // gives the slope of the entire response curve.
+  const response = await fetch("/api/food-demand/nutrients", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      country,
+      scenario: selectedView,
+      shock: 0.10
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Curve API returned HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  const valueAtTen = result.nutrient_changes_percent[nutrient];
+
+  const points = [];
+  for (let x = -30; x <= 30; x += 5) {
+    points.push({
+      shock: x,
+      change: valueAtTen * (x / 10)
+    });
+  }
+
+  const maxAbs = Math.max(
+    1,
+    ...points.map(point => Math.abs(point.change))
+  );
+
+  const xCoord = x => 70 + ((x + 30) / 60) * 650;
+  const yCoord = y => 140 - (y / maxAbs) * 105;
+
+  const path = points.map((point, index) =>
+    `${index === 0 ? "M" : "L"} ${xCoord(point.shock)} ${yCoord(point.change)}`
+  ).join(" ");
+
+  const currentChange = valueAtTen * (shock / 10);
+
+  curve.innerHTML = `
+    <line x1="70" y1="140" x2="720" y2="140"
+          stroke="#a1a1aa" stroke-dasharray="5 5"/>
+    <path d="${path}" fill="none" stroke="#2563eb"
+          stroke-width="3" stroke-linecap="round"/>
+    <line x1="${xCoord(shock)}" y1="30"
+          x2="${xCoord(shock)}" y2="245"
+          stroke="#93c5fd" stroke-dasharray="5 5"/>
+    <circle cx="${xCoord(shock)}" cy="${yCoord(currentChange)}"
+            r="6" fill="#2563eb" stroke="white" stroke-width="2"/>
+    <text x="70" y="265" font-size="13" fill="#71717a">−30%</text>
+    <text x="395" y="265" text-anchor="middle"
+          font-size="13" fill="#71717a">0%</text>
+    <text x="720" y="265" text-anchor="end"
+          font-size="13" fill="#71717a">+30%</text>
+    <text x="60" y="35" text-anchor="end"
+          font-size="12" fill="#71717a">+${maxAbs.toFixed(1)}%</text>
+    <text x="60" y="140" text-anchor="end"
+          font-size="12" fill="#71717a">0%</text>
+    <text x="60" y="245" text-anchor="end"
+          font-size="12" fill="#71717a">−${maxAbs.toFixed(1)}%</text>
+  `;
+
+  currentLabel.textContent =
+    `${country} · ${nutrient}: ${currentChange >= 0 ? "+" : ""}` +
+    `${currentChange.toFixed(2)}% at ${shock >= 0 ? "+" : ""}${shock}% ` +
+    "(workbook-based model)";
+}
+
+["country", "nutrientSelect"].forEach(id => {
+  document.getElementById(id).addEventListener(
+    "change",
+    () => refreshWorkbookResponseCurve().catch(console.error)
+  );
+});
+
+document.getElementById("shock").addEventListener(
+  "input",
+  () => refreshWorkbookResponseCurve().catch(console.error)
+);
+
+document.querySelectorAll("[data-view]").forEach(button => {
+  button.addEventListener(
+    "click",
+    () => refreshWorkbookResponseCurve().catch(console.error)
+  );
+});
+
+refreshWorkbookResponseCurve().catch(console.error);

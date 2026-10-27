@@ -90,7 +90,7 @@
         </div>
 
         <div class="chart-scroll">
-          <div class="plot" id="plot" role="img" aria-label="Illustrative grouped food consumption chart"></div>
+          <div class="plot" id="plot" role="img" aria-label="FAO baseline and modeled food supply by food group"></div>
           <div class="xlabels" id="labels"></div>
         </div>
 
@@ -112,7 +112,7 @@
           using workbook elasticities and FAO baselines.
         </p>
         <div class="nutrient-axis"><span>Decrease</span><span>0%</span><span>Increase</span></div>
-        <div id="nutrientChart" class="nutrient-chart" aria-label="Illustrative nutrient change bars"></div>
+        <div id="nutrientChart" class="nutrient-chart" aria-label="Modeled national nutrient supply changes"></div>
         <div class="nutrient-focus" id="nutrientFocus" aria-live="polite"></div>
         <p class="caption">
           Own-price and income results are calculated from Andrew's
@@ -128,12 +128,13 @@
         <p class="subtitle" id="curveSubtitle">Energy response from −30% to +30%</p>
         <div class="curve-wrap">
           <svg id="responseCurve" viewBox="0 0 760 280" role="img"
-               aria-label="Illustrative nutrient response curve"></svg>
+               aria-label="Modeled nutrient response curve"></svg>
         </div>
         <div class="curve-current" id="curveCurrent" aria-live="polite"></div>
         <p class="caption">
-          Illustrative response across shock sizes, not calculated from Andrew's workbook.
-          The blue dot marks the current slider value.
+          Own-price and income curves use the workbook-based linear
+          elasticity model. The blue dot marks the selected shock.
+          Cross-price and tariff curves are not yet available.
         </p>
       </section>
       </div>

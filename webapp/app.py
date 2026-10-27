@@ -522,6 +522,20 @@ def simulate_food_demand():
             "error": "No elasticity estimate available"
         })
 
+    
+    baseline = food["baseline_g_day"]
+    predicted = predict_quantity(baseline, elasticity, shock)
+
+    return jsonify({
+        "country": country,
+        "food_group": food_group,
+        "scenario": scenario,
+        "shock": shock,
+        "elasticity": elasticity,
+        "baseline_g_day": round(baseline, 2),
+        "predicted_g_day": round(predicted, 2),
+        "change_percent": round(elasticity * shock * 100, 2),
+    })
 
 @app.route("/api/food-demand/simulate-all", methods=["POST"])
 def simulate_all_food_groups():
@@ -635,21 +649,6 @@ def simulate_all_food_groups():
         "shock": shock,
         "food_groups": results,
     })
-
-    baseline = food["baseline_g_day"]
-    predicted = predict_quantity(baseline, elasticity, shock)
-
-    return jsonify({
-        "country": country,
-        "food_group": food_group,
-        "scenario": scenario,
-        "shock": shock,
-        "elasticity": elasticity,
-        "baseline_g_day": round(baseline, 2),
-        "predicted_g_day": round(predicted, 2),
-        "change_percent": round(elasticity * shock * 100, 2),
-    })
-
 
 @app.route("/api/food-demand/nutrients", methods=["POST"])
 def simulate_food_demand_nutrients():

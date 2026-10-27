@@ -14,22 +14,29 @@ os.environ["FOOD_DEMAND_WORKBOOK_DIR"] = (
 
 from app import app
 
-client = app.test_client()
 
-response = client.post(
-    "/api/food-demand/simulate",
-    json={
-        "country": "Nigeria",
-        "scenario": "own",
-        "food_group": "Grains and vegetables",
-        "shock": 0.10,
-    },
-)
+def test_nigeria_own_price_simulation():
+    """Check Nigeria's 10% own-price scenario."""
 
-print("Status:", response.status_code)
-print("Response:", response.get_json())
+    client = app.test_client()
 
-assert response.status_code == 200
-assert abs(response.get_json()["predicted_g_day"] - 1225.64) < 0.02
+    response = client.post(
+        "/api/food-demand/simulate",
+        json={
+            "country": "Nigeria",
+            "scenario": "own",
+            "food_group": "Grains and vegetables",
+            "shock": 0.10,
+        },
+    )
 
-print("PASS: Food-demand Flask API")
+    assert response.status_code == 200, (
+        f"API returned {response.status_code}: "
+        f"{response.get_json()}"
+    )
+
+    result = response.get_json()
+
+    assert abs(
+        result["predicted_g_day"] - 1225.64
+    ) < 0.02

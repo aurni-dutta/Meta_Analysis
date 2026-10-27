@@ -716,6 +716,138 @@ def simulate_food_demand_nutrients():
     })
 
 
+@app.route("/api/food-demand/nutrient-sources", methods=["POST"])
+def food_demand_nutrient_sources():
+    """Food-group contributions to FAO nutrient supply."""
+
+    import os
+    from pathlib import Path
+    from openpyxl import load_workbook
+
+    payload = request.get_json(silent=True) or {}
+
+    files = {
+        "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
+        "Ghana": "GHANA_FOOD_RESULTS.xlsx",
+        "South Africa": "SOUTH_AFRICA_FOOD_RESULTS.xlsx",
+    }
+
+    country = payload.get("country")
+
+    if country not in files:
+        return jsonify({"error": "Unsupported country"}), 400
+
+    directory = os.environ.get("FOOD_DEMAND_WORKBOOK_DIR")
+
+    if not directory:
+        return jsonify({"error": "Workbook directory not configured"}), 503
+
+    path = Path(directory) / files[country]
+
+    if not path.is_file():
+        return jsonify({"error": "Country workbook not found"}), 503
+
+    # These headers come from TABLE 2 CONSUMPTION.
+    nutrients = {
+        "Energy": "Energy kcal/cap/day",
+        "Protein": "Protein g/cap/day",
+        "Fat": "Fat g/cap/day",
+        "Iron": "Iron mg/cap/day",
+        "Zinc": "Zinc mg/cap/day",
+        "Vitamin A": "Vitamin A mcg RAE/cap/day",
+    }
+
+    workbook = None
+
+    try:
+        workbook = load_workbook(
+            path, read_only=True, data_only=True
+        )
+        sheet = workbook["TABLE 2 CONSUMPTION"]
+
+        rows = sheet.iter_rows(min_row=3, values_only=True)
+        headers = next(rows)  # Row 3 contains the actual column headers
+
+        columns = {
+            name: index
+            for index, name in enumerate(headers)
+            if name is not None
+        }
+
+        groups = []
+
+        for row in rows:
+            name = row[columns["Product group"]]
+
+            if not isinstance(name, str):
+                break
+
+            name = name.strip()
+
+            if not name or name.lower().startswith(("total", "all groups")):
+                break
+
+            # Tobacco has no FAO food supply in this workbook.
+            if name == "Tobacco":
+                continue
+
+            values = {}
+
+            for nutrient, header in nutrients.items():
+                value = row[columns[header]]
+                values[nutrient] = (
+                    float(value)
+                    if isinstance(value, (int, float))
+                    and not isinstance(value, bool)
+                    else 0.0
+                )
+
+            groups.append({
+                "food_group": name,
+                "nutrients": values,
+            })
+
+        totals = {
+            nutrient: sum(
+                group["nutrients"][nutrient]
+                for group in groups
+            )
+            for nutrient in nutrients
+        }
+
+        result = {}
+
+        for nutrient in nutrients:
+            total = totals[nutrient]
+
+            result[nutrient] = [
+                {
+                    "food_group": group["food_group"],
+                    "percent": round(
+                        100 * group["nutrients"][nutrient] / total, 4
+                    ) if total > 0 else 0,
+                }
+                for group in groups
+            ]
+
+        return jsonify({
+            "country": country,
+            "contributions": result,
+        })
+
+    except (OSError, KeyError, ValueError, TypeError) as exc:
+        app.logger.exception(
+            "Could not load nutrient contributions"
+        )
+        return jsonify({
+            "error": "Unable to read nutrient contribution data"
+        }), 500
+
+    finally:
+        if workbook is not None:
+            workbook.close()
+
+
 @app.route("/settings")
 def settings_page():
     return render_template("settings.html")

@@ -137,6 +137,39 @@
           Cross-price and tariff curves are not yet available.
         </p>
       </section>
+
+      
+      <section class="card nutrient-card">
+        <h2>Where do nutrients come from?</h2>
+
+        <p class="subtitle">
+          Share of national nutrient supply contributed by each food group,
+          using FAO 2023 baseline data.
+        </p>
+
+        <div id="nutrientSourcesStatus"
+            class="caption"
+            role="status"
+            aria-live="polite">
+          Loading nutrient contributions...
+        </div>
+
+        <div id="nutrientSourcesChart"
+            class="sources-chart"
+            aria-label="Food group contributions to national nutrient supply">
+        </div>
+
+        <div id="nutrientSourcesLegend"
+            class="sources-legend">
+        </div>
+
+        <p class="caption">
+          Each row represents 100% of that nutrient's estimated national
+          food supply. These are food-supply contributions, not measured
+          individual dietary intake or recommended intake targets.
+        </p>
+      </section>
+
       </div>
     </div>
   </main>
@@ -144,5 +177,6 @@
   <script src="{{ url_for('static', filename='js/nav_state.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_nutrients.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_sources.js') }}"></script>
 </body>
 </html>

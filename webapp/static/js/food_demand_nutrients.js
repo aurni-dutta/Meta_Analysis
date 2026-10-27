@@ -18,10 +18,13 @@ async function refreshWorkbookNutrients() {
   // selectedView is declared in food_demand.js.
   if (selectedView !== "own" && selectedView !== "income") {
     nutrientBars.forEach(({ fill, valueLabel }) => {
-      fill.style.width = "0%";
-      valueLabel.textContent = "N/A";
+        fill.style.width = "0%";
+        fill.style.left = "50%";
+        valueLabel.textContent = "—";
     });
 
+    document.getElementById("responseCurve").replaceChildren();
+    
     focus.textContent =
       "Workbook nutrient results are not available for this scenario.";
     return;
@@ -90,9 +93,19 @@ async function refreshWorkbookNutrients() {
   } catch (error) {
     if (requestId !== nutrientApiRequest) return;
 
-    focus.textContent = `Nutrient API error: ${error.message}`;
-    console.error(error);
-  }
+    // Clear stale or illustrative results when the API fails.
+    nutrientBars.forEach(({ fill, valueLabel }) => {
+        fill.style.width = "0%";
+        fill.style.left = "50%";
+        valueLabel.textContent = "—";
+    });
+
+    focus.textContent =
+        `Data unavailable: ${error.message}`;
+
+    console.error("Nutrient API error:", error);
+    }
+  
 }
 
 // Run after food_demand.js's event listeners.
@@ -219,4 +232,11 @@ document.querySelectorAll("[data-view]").forEach(button => {
   );
 });
 
-refreshWorkbookResponseCurve().catch(console.error);
+refreshWorkbookResponseCurve().catch(error => {
+  document.getElementById("responseCurve").replaceChildren();
+
+  document.getElementById("curveCurrent").textContent =
+    `Data unavailable: ${error.message}`;
+
+  console.error("Response curve API error:", error);
+});

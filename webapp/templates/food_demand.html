@@ -23,19 +23,34 @@
             <option value="Ghana">Ghana (layout preview)</option>
             <option value="South Africa">South Africa (layout preview)</option>
           </select>
-          <p class="caption">Country selection previews the interface; country-specific model data is not connected.</p>
+          <p class="caption">
+            Country-specific FAO 2023 food supply and elasticity estimates
+            are loaded from Andrew's workbooks for supported scenarios.
+          </p>
         </div>
+        
         <div class="field" id="foodGroupField">
-          <label for="foodGroup">Food group affected by price change</label>
+          <label for="foodGroup">Food group to highlight</label>
+
           <select id="foodGroup">
-            <option>Fruits &amp; vegetables</option>
-            <option>Meats</option>
-            <option>Grains</option>
+            <option>Grains and vegetables</option>
+            <option>Meat and eggs</option>
+            <option>Edible oil</option>
+            <option>Aquatic products</option>
+            <option>Fruits</option>
+            <option>Sugar</option>
             <option>Dairy</option>
-            <option>Fats &amp; oils</option>
-            <option>Seafood</option>
+            <option>Alcohol</option>
+            <option>Ungrouped / other</option>
           </select>
+
+          <p class="caption">
+            The current chart compares each group's response to its own
+            price change. This selector highlights a group; it does not
+            change which prices are simulated.
+          </p>
         </div>
+
         <div class="field" id="passThroughField" hidden>
           <label for="passThrough">Tariff pass-through</label>
           <input id="passThrough" type="range" min="0" max="100" step="5" value="100">
@@ -80,8 +95,10 @@
         </div>
 
         <p class="caption">
-          Illustrative values only — not observed data, official dietary targets, or
-          validated model predictions.
+          Orange bars represent FAO 2023 food-supply baselines.
+          Blue bars show elasticity-based model predictions from Andrew's workbooks.
+          These are estimates of food availability, not observed individual consumption.
+          Nutrient visualizations below may have different data-validation status.
         </p>
         <p class="caption" id="scenarioNote" aria-live="polite"></p>
       </section>
@@ -90,11 +107,19 @@
            Values are deliberately illustrative until workbook calculations are integrated. -->
       <section class="card nutrient-card">
         <h2>Nutrient impact</h2>
-        <p class="subtitle">Illustrative percentage changes in national food supply nutrients</p>
+        <p class="subtitle">
+          Modeled percentage changes in national food-supply nutrients
+          using workbook elasticities and FAO baselines.
+        </p>
         <div class="nutrient-axis"><span>Decrease</span><span>0%</span><span>Increase</span></div>
         <div id="nutrientChart" class="nutrient-chart" aria-label="Illustrative nutrient change bars"></div>
         <div class="nutrient-focus" id="nutrientFocus" aria-live="polite"></div>
-        <p class="caption">Animation-only demo. Energy, protein, fat, iron, zinc and vitamin A follow Andrew's nutrient categories; displayed changes are not workbook results.</p>
+        <p class="caption">
+          Own-price and income results are calculated from Andrew's
+          workbooks. Groups without elasticity estimates are excluded
+          from estimated changes and reported as missing.
+          Cross-price and tariff nutrient results are not yet available.
+        </p>
       </section>
 
       <!-- How the selected nutrient responds across the full shock range. -->
@@ -116,6 +141,7 @@
   </main>
 
   <script src="{{ url_for('static', filename='js/nav_state.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/food_demand.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_nutrients.js') }}"></script>
 </body>
 </html>

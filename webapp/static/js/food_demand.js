@@ -419,6 +419,7 @@ function updateView() {
     );
 
     const bar = predictedBars[index];
+    if (!bar) return;
 
     bar.style.height = barHeight(illustrativePrediction);
 
@@ -474,22 +475,10 @@ document.querySelectorAll("[data-view]").forEach((button) => {
   );
 });
 
-// Initial render.
-buildChart();
+// Initialize nutrient preview and scenario controls.
+// The real food-supply chart loads from Flask separately.
 buildNutrientChart();
 updateView();
-
-
-// Temporary integration check.
-// Remove this block after connecting the vertical chart.
-fetchWorkbookFoodData("Nigeria", "own", 10)
-  .then((results) => {
-    console.log("REAL WORKBOOK DATA:");
-    console.table(results);
-  })
-  .catch((error) => {
-    console.error("Workbook API error:", error);
-  });
 
   
 // ------------------------------------------------------------

@@ -175,3 +175,10 @@
     .curve-wrap { margin-top: 20px; width: 100%; }
     .curve-wrap svg { width: 100%; height: auto; display: block; }
     .curve-current { margin-top: 8px; color: #1d4ed8; font-weight: 650; font-size: 13px; }
+
+    
+/* Highlight the selected workbook food group. */
+#plot .category.fd-highlighted {
+  background: #eff6ff;
+  border-radius: 8px 8px 0 0;
+}

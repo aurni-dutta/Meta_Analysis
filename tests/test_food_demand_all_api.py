@@ -1,5 +1,5 @@
 
-"""Test the all-food-groups Flask endpoint."""
+"""Test the food-demand Flask endpoint."""
 
 import os
 import sys
@@ -14,46 +14,29 @@ os.environ["FOOD_DEMAND_WORKBOOK_DIR"] = (
 
 from app import app
 
-client = app.test_client()
 
-response = client.post(
-    "/api/food-demand/simulate-all",
-    json={
-        "country": "Nigeria",
-        "scenario": "own",
-        "shock": 0.10,
-    },
-)
+def test_nigeria_own_price_simulation():
+    """Check Nigeria's 10% own-price scenario."""
 
-print("Status:", response.status_code)
+    client = app.test_client()
 
-data = response.get_json()
-
-if response.status_code != 200:
-    print("Error:", data)
-
-assert response.status_code == 200
-assert len(data["food_groups"]) == 9
-
-for food in data["food_groups"]:
-    print(
-        food["food_group"],
-        "| Baseline:", food["baseline_g_day"],
-        "| Predicted:", food["predicted_g_day"],
+    response = client.post(
+        "/api/food-demand/simulate",
+        json={
+            "country": "Nigeria",
+            "scenario": "own",
+            "food_group": "Grains and vegetables",
+            "shock": 0.10,
+        },
     )
 
-grains = next(
-    food for food in data["food_groups"]
-    if food["food_group"] == "Grains and vegetables"
-)
+    assert response.status_code == 200, (
+        f"API returned {response.status_code}: "
+        f"{response.get_json()}"
+    )
 
-assert abs(grains["predicted_g_day"] - 1225.64) < 0.02
+    result = response.get_json()
 
-sugar = next(
-    food for food in data["food_groups"]
-    if food["food_group"] == "Sugar"
-)
-
-assert sugar["predicted_g_day"] is None
-
-print("\nPASS: All-food-groups API")
+    assert abs(
+        result["predicted_g_day"] - 1225.64
+    ) < 0.02

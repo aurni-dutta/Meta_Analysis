@@ -2471,6 +2471,66 @@ def food_demand_trade_exposure():
         if workbook is not None:
             workbook.close()
 
+@app.route("/api/food-demand/targeted-price", methods=["POST"])
+def food_demand_targeted_price():
+    """Simulate a price change for one food group."""
+
+    import os
+    from pathlib import Path
+    from food_demand import calculate_targeted_price_shock
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Expected a JSON object"}), 400
+
+    country = data.get("country")
+    food_group = data.get("food_group")
+    shock = data.get("shock")
+
+    workbook_names = {
+        "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
+        "Ghana": "GHANA_FOOD_RESULTS.xlsx",
+        "South Africa": "SOUTH_AFRICA_FOOD_RESULTS.xlsx",
+    }
+
+    if country not in workbook_names:
+        return jsonify({"error": "Unsupported country"}), 400
+
+    if not isinstance(food_group, str) or not food_group.strip():
+        return jsonify({"error": "Food group is required"}), 400
+
+    workbook_dir = os.environ.get("FOOD_DEMAND_WORKBOOK_DIR")
+
+    if not workbook_dir:
+        return jsonify({
+            "error": "Workbook directory not configured"
+        }), 503
+
+    workbook_path = Path(workbook_dir) / workbook_names[country]
+
+    if not workbook_path.is_file():
+        return jsonify({"error": "Country workbook not found"}), 503
+
+    try:
+        result = calculate_targeted_price_shock(
+            workbook_path,
+            food_group,
+            shock,
+        )
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except (OSError, KeyError, IndexError, TypeError):
+        app.logger.exception("Unable to calculate targeted price shock")
+        return jsonify({
+            "error": "Unable to read targeted price data"
+        }), 500
+
+    return jsonify({
+        "country": country,
+        **result,
+    })
+
 if __name__ == "__main__":
     # host="0.0.0.0" is required for any non-local deployment (a droplet, a
     # VM, a container) — Flask's default host is 127.0.0.1, which only

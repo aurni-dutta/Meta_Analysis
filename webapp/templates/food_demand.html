@@ -149,6 +149,18 @@ are loaded from the food-demand model workbooks for supported scenarios.
           result have different scopes. The nutrient model aggregates
           changes across food groups.
         </p>
+
+        
+        <div class="dss-export">
+          <button type="button" id="exportScenarioCsv"
+                  class="dss-export-button">
+            Export current scenario to CSV
+          </button>
+
+          <span id="exportScenarioStatus"
+                role="status" aria-live="polite"></span>
+        </div>
+
       </div>
 
         <div class="tabs" aria-label="Chart view">
@@ -342,5 +354,6 @@ are loaded from the food-demand model workbooks for supported scenarios.
 <script src="{{ url_for('static', filename='js/food_demand_presets.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_elasticities.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_summary.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_export.js') }}"></script>
 </body>
 </html>

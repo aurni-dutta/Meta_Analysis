@@ -2531,6 +2531,145 @@ def food_demand_targeted_price():
         **result,
     })
 
+
+@app.route("/api/food-demand/energy-availability", methods=["GET"])
+def food_demand_energy_availability():
+    """Return 2023 food-group energy availability for three countries."""
+
+    import os
+    import math
+    from pathlib import Path
+    from openpyxl import load_workbook
+
+    workbook_names = {
+        "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
+        "Ghana": "GHANA_FOOD_RESULTS.xlsx",
+        "South Africa": "SOUTH_AFRICA_FOOD_RESULTS.xlsx",
+    }
+
+    food_groups = [
+        "Grains and vegetables",
+        "Meat and eggs",
+        "Edible oil",
+        "Aquatic products",
+        "Fruits",
+        "Sugar",
+        "Dairy",
+        "Alcohol",
+        "Ungrouped / other",
+    ]
+
+    directory = os.environ.get("FOOD_DEMAND_WORKBOOK_DIR")
+
+    if not directory:
+        return jsonify({
+            "error": "Workbook directory not configured"
+        }), 503
+
+    countries = []
+
+    try:
+        for country, filename in workbook_names.items():
+            path = Path(directory) / filename
+
+            if not path.is_file():
+                return jsonify({
+                    "error": f"Workbook unavailable for {country}"
+                }), 503
+
+            workbook = load_workbook(
+                path,
+                read_only=True,
+                data_only=True,
+            )
+
+            try:
+                sheet = workbook["TABLE 2 CONSUMPTION"]
+
+                values = {}
+                national_total = None
+
+                for row in sheet.iter_rows(
+                    min_row=4,
+                    values_only=True
+                ):
+                    group = row[0]
+                    energy = row[3]
+
+                    if group == "Total (all groups)":
+                        national_total = energy
+
+                    elif group in food_groups:
+                        if (
+                            not isinstance(energy, (int, float))
+                            or isinstance(energy, bool)
+                            or not math.isfinite(energy)
+                            or energy < 0
+                        ):
+                            raise ValueError(
+                                f"Invalid energy value: {country}, {group}"
+                            )
+
+                        values[group] = energy
+
+                if (
+                    not isinstance(national_total, (int, float))
+                    or not math.isfinite(national_total)
+                    or national_total <= 0
+                ):
+                    raise ValueError(
+                        f"Invalid national energy total for {country}"
+                    )
+
+                if set(values) != set(food_groups):
+                    raise ValueError(
+                        f"Missing food groups for {country}"
+                    )
+
+                group_sum = sum(values.values())
+
+                # Do not silently alter workbook values.
+                if abs(group_sum - national_total) > 0.1:
+                    raise ValueError(
+                        f"Energy groups do not match national total: {country}"
+                    )
+
+                countries.append({
+                    "country": country,
+                    "total_kcal_day": round(national_total, 2),
+                    "food_groups": [
+                        {
+                            "food_group": group,
+                            "energy_kcal_day": round(values[group], 2),
+                            "share_percent": round(
+                                values[group] / national_total * 100,
+                                2
+                            ),
+                        }
+                        for group in food_groups
+                    ],
+                })
+
+            finally:
+                workbook.close()
+
+    except (OSError, KeyError, ValueError, IndexError, TypeError):
+        app.logger.exception("Energy availability data error")
+        return jsonify({
+            "error": "Unable to read energy availability data"
+        }), 500
+
+    return jsonify({
+        "year": 2023,
+        "unit": "kcal/person/day",
+        "countries": countries,
+    })
+
+@app.route("/food-demand-showcase")
+def food_demand_showcase():
+    """Display the interactive DSS visualization showcase."""
+    return render_template("food_demand_showcase.html")
+
 if __name__ == "__main__":
     # host="0.0.0.0" is required for any non-local deployment (a droplet, a
     # VM, a container) — Flask's default host is 127.0.0.1, which only

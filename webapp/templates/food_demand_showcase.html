@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DSS Showcase | Energy Availability</title>
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/food_demand_showcase.css') }}">
+</head>
+<body>
+  <main class="showcase">
+    <header class="showcase-header">
+      <div>
+        <p class="eyebrow">AFRICAN AGRI-FOOD DSS · VISUALIZATION PROTOTYPE</p>
+        <h1>National Food Energy Availability</h1>
+        <p class="intro">
+          Explore how different food groups contribute to
+          national food energy availability across three countries.
+        </p>
+      </div>
+      <span class="year-tag">2023 FAO Food Balance Sheet</span>
+    </header>
+
+    <section class="chart-card">
+      <div class="chart-heading">
+        <div>
+          <h2>Energy availability by food group</h2>
+          <p>kcal per person per day · Stacked by food group</p>
+        </div>
+
+        <label class="highlight-control">
+          Highlight food group
+          <select id="highlightFoodGroup">
+            <option value="all">All food groups</option>
+          </select>
+        </label>
+      </div>
+
+      <p id="energyStatus" role="status" aria-live="polite">
+        Loading workbook data...
+      </p>
+
+      <div id="energyChart"
+           class="energy-chart"
+           aria-label="Stacked bar chart of food energy availability">
+      </div>
+
+      <div id="energyLegend" class="energy-legend"></div>
+
+      <p class="source-note">
+        Source: 2023 country food-supply workbooks,
+        TABLE 2 CONSUMPTION. Bars represent national food
+        energy availability, not observed individual dietary
+        intake. The food groups are displayed using the
+        workbook's classifications.
+      </p>
+    </section>
+
+    <footer class="showcase-footer">
+      <span>Research visualization · Workbook-backed data</span>
+      <a href="/food-demand">Return to Food Demand Dashboard</a>
+    </footer>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/food_demand_showcase.js') }}"></script>
+</body>
+</html>

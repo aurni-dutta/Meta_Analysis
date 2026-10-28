@@ -457,6 +457,83 @@ are loaded from the food-demand model workbooks for supported scenarios.
   </p>
 </section>
 
+<section class="card">
+  <h2>Targeted food-group price shock</h2>
+
+  <p class="subtitle">
+    Simulate an own-price change for one food group.
+    Other food groups remain at baseline; cross-price
+    substitution is not included.
+  </p>
+
+  <div class="dss-targeted-controls">
+    <label>
+      Country
+      <select id="targetedCountry">
+        <option value="Nigeria">Nigeria</option>
+        <option value="Ghana">Ghana</option>
+        <option value="South Africa">South Africa</option>
+      </select>
+    </label>
+
+    <label>
+      Food group
+      <select id="targetedFoodGroup">
+        <option value="Grains and vegetables">Grains and vegetables</option>
+        <option value="Meat and eggs">Meat and eggs</option>
+        <option value="Edible oil">Edible oil</option>
+        <option value="Aquatic products">Aquatic products</option>
+        <option value="Fruits">Fruits</option>
+        <option value="Sugar">Sugar</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Alcohol">Alcohol</option>
+        <option value="Ungrouped / other">Ungrouped / other</option>
+      </select>
+    </label>
+
+    <label>
+      Price change (%)
+      <input id="targetedShock" type="number"
+             min="-30" max="30" step="1" value="10">
+    </label>
+  </div>
+
+  <button type="button" id="runTargetedShock">
+    Run targeted scenario
+  </button>
+
+  <p id="targetedStatus" role="status" aria-live="polite"></p>
+
+  <div id="targetedResults" hidden>
+    <div class="dss-targeted-summary">
+      <p><strong>Own-price elasticity:</strong>
+         <span id="targetedElasticity"></span></p>
+      <p><strong>Baseline supply:</strong>
+         <span id="targetedBaseline"></span></p>
+      <p><strong>Predicted supply:</strong>
+         <span id="targetedPredicted"></span></p>
+      <p><strong>Food-group supply change:</strong>
+         <span id="targetedQuantityChange"></span></p>
+    </div>
+
+    <h3>Modeled national nutrient-supply changes</h3>
+
+    <table class="elasticity-table">
+      <thead>
+        <tr>
+          <th>Nutrient</th>
+          <th>Change (%)</th>
+        </tr>
+      </thead>
+      <tbody id="targetedNutrientsBody"></tbody>
+    </table>
+
+    <p class="caption">
+      Results describe changes in modeled national food supply,
+      not measured dietary intake or nutritional adequacy.
+    </p>
+  </div>
+</section>
 
 
       </div>
@@ -473,5 +550,6 @@ are loaded from the food-demand model workbooks for supported scenarios.
 <script src="{{ url_for('static', filename='js/food_demand_export.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_comparison.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_trade.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_targeted.js') }}"></script>
 </body>
 </html>

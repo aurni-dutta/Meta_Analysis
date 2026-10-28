@@ -582,3 +582,112 @@
     font-size: 11px;
   }
 }
+
+/* Targeted food-group scenario */
+
+.dss-targeted-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.dss-targeted-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dss-targeted-controls select,
+.dss-targeted-controls input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+}
+
+.dss-targeted-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+  margin: 20px 0;
+}
+
+.dss-targeted-summary p {
+  margin: 0;
+}
+
+@media (max-width: 650px) {
+  .dss-targeted-controls,
+  .dss-targeted-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Targeted food-group scenario */
+
+.dss-targeted-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.dss-targeted-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dss-targeted-controls select,
+.dss-targeted-controls input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+}
+
+.dss-targeted-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+  margin: 20px 0;
+}
+
+.dss-targeted-summary p {
+  margin: 0;
+}
+
+@media (max-width: 650px) {
+  .dss-targeted-controls,
+  .dss-targeted-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+#runTargetedShock {
+  background: #5968e8;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 13px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 8px 0 18px;
+}
+
+#runTargetedShock:hover {
+  background: #4556cb;
+}
+
+#runTargetedShock:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

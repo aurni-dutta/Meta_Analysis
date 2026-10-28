@@ -252,7 +252,6 @@
   }
 }
 
-
 /* DSS methodology and model interpretation panel */
 
 .dss-methodology {
@@ -283,4 +282,52 @@
 
 .dss-methodology-content strong {
   color: #222b3b;
+}
+
+
+/* DSS quick scenario examples */
+
+.dss-presets {
+  margin-bottom: 24px;
+  padding: 18px 20px;
+  border: 1px solid #dce3f0;
+  border-radius: 12px;
+  background: #f8faff;
+}
+
+.dss-presets h3 {
+  margin: 0 0 7px;
+  font-size: 16px;
+}
+
+.dss-presets p {
+  margin: 0 0 13px;
+  color: #626b7c;
+  font-size: 13px;
+}
+
+.dss-presets-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dss-preset {
+  padding: 10px 14px;
+  border: 1px solid #cdd8f5;
+  border-radius: 8px;
+  background: white;
+  color: #355bc4;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dss-preset:hover {
+  background: #eaf0ff;
+}
+
+.dss-presets .dss-presets-note {
+  margin-top: 13px;
+  margin-bottom: 0;
+  font-size: 12px;
 }

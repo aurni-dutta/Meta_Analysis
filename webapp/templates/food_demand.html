@@ -74,6 +74,41 @@ are loaded from the food-demand model workbooks for supported scenarios.
 
       <div class="visualizations">
       <section class="card">
+        
+      <div class="dss-presets">
+        <h3>Quick scenario examples</h3>
+        <p>
+          Select an example to update the country, scenario,
+          and shock settings.
+        </p>
+
+        <div class="dss-presets-buttons">
+          <button
+            type="button"
+            class="dss-preset"
+            data-preset-country="Nigeria"
+            data-preset-view="own"
+            data-preset-shock="10">
+            Nigeria · +10% own-price comparison
+          </button>
+
+          <button
+            type="button"
+            class="dss-preset"
+            data-preset-country="Ghana"
+            data-preset-view="income"
+            data-preset-shock="10">
+            Ghana · +10% food-expenditure increase
+          </button>
+        </div>
+
+        <p class="dss-presets-note">
+          These examples use existing workbook-backed calculations.
+          The own-price comparison applies the shock separately
+          to each food group's own price.
+        </p>
+      </div>
+
         <div class="tabs" aria-label="Chart view">
           <button type="button" class="active" data-view="own">Own-price</button>
           <button type="button" data-view="cross">Cross-price</button>
@@ -222,5 +257,6 @@ are loaded from the food-demand model workbooks for supported scenarios.
 <script src="{{ url_for('static', filename='js/food_demand.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_nutrients.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_sources.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_presets.js') }}"></script>
 </body>
 </html>

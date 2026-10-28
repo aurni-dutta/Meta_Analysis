@@ -342,6 +342,93 @@ are loaded from the food-demand model workbooks for supported scenarios.
       </p>
     </section>
 
+    
+<section class="card">
+  <h2>Compare nutrient scenarios</h2>
+
+  <p class="subtitle">
+    Compare modeled national nutrient supply changes across
+    two independently selected scenarios.
+  </p>
+
+  <div class="dss-compare-controls">
+    <div class="dss-compare-panel">
+      <h3>Scenario A</h3>
+
+      <label for="compareCountryA">Country</label>
+      <select id="compareCountryA">
+        <option value="Nigeria">Nigeria</option>
+        <option value="Ghana">Ghana</option>
+        <option value="South Africa">South Africa</option>
+      </select>
+
+      <label for="compareScenarioA">Scenario</label>
+      <select id="compareScenarioA">
+        <option value="own">Own-price</option>
+        <option value="income">Income</option>
+      </select>
+
+      <label for="compareShockA">Shock (%)</label>
+      <input id="compareShockA" type="number"
+             min="-30" max="30" step="1" value="10">
+    </div>
+
+    <div class="dss-compare-panel">
+      <h3>Scenario B</h3>
+
+      <label for="compareCountryB">Country</label>
+      <select id="compareCountryB">
+        <option value="Nigeria">Nigeria</option>
+        <option value="Ghana">Ghana</option>
+        <option value="South Africa">South Africa</option>
+      </select>
+
+      <label for="compareScenarioB">Scenario</label>
+      <select id="compareScenarioB">
+        <option value="income">Income</option>
+        <option value="own">Own-price</option>
+      </select>
+
+      <label for="compareShockB">Shock (%)</label>
+      <input id="compareShockB" type="number"
+             min="-30" max="30" step="1" value="10">
+    </div>
+  </div>
+
+  <button type="button" id="runScenarioComparison"
+          class="dss-export-button">
+    Compare scenarios
+  </button>
+
+  <p id="compareStatus" class="caption"
+     role="status" aria-live="polite">
+    Select two scenarios to compare.
+  </p>
+
+  <div class="elasticity-table-wrap">
+    <table class="elasticity-table">
+      <thead>
+        <tr>
+          <th scope="col">Nutrient</th>
+          <th scope="col">Scenario A (%)</th>
+          <th scope="col">Scenario B (%)</th>
+          <th scope="col">Difference B − A (percentage points)</th>
+        </tr>
+      </thead>
+      <tbody id="compareResultsBody"></tbody>
+    </table>
+  </div>
+
+  <p class="caption">
+    Values are modeled percentage changes in national nutrient
+    food supply relative to each country's own baseline.
+    The difference is shown in percentage points and is
+    especially important to interpret carefully when
+    comparing different countries.
+    These are not estimates of individual dietary intake.
+  </p>
+</section>
+
 
       </div>
     </div>
@@ -355,5 +442,6 @@ are loaded from the food-demand model workbooks for supported scenarios.
 <script src="{{ url_for('static', filename='js/food_demand_elasticities.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_summary.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_export.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_comparison.js') }}"></script>
 </body>
 </html>

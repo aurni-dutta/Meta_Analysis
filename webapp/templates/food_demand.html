@@ -430,6 +430,35 @@ are loaded from the food-demand model workbooks for supported scenarios.
 </section>
 
 
+<section class="card">
+  <h2>Trade exposure by food group</h2>
+
+  <p class="subtitle">
+    Kcal-weighted import dependency from the 2023 country
+    food-supply workbooks.
+  </p>
+
+  <p id="tradeExposureStatus"
+     class="caption"
+     role="status"
+     aria-live="polite">
+    Loading trade exposure...
+  </p>
+
+  <div id="tradeExposureChart"
+       class="trade-exposure-chart">
+  </div>
+
+  <p class="caption">
+    Import dependency describes the share associated with
+    imported food supply in the workbook's indicator.
+    It does not predict the effects of tariffs or trade policies.
+    Unavailable values are displayed as unavailable.
+  </p>
+</section>
+
+
+
       </div>
     </div>
   </main>
@@ -443,5 +472,6 @@ are loaded from the food-demand model workbooks for supported scenarios.
 <script src="{{ url_for('static', filename='js/food_demand_summary.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_export.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_comparison.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_trade.js') }}"></script>
 </body>
 </html>

@@ -2358,6 +2358,119 @@ def food_demand_elasticities():
     })
 
 
+@app.route("/api/food-demand/trade-exposure", methods=["POST"])
+def food_demand_trade_exposure():
+    """Read kcal-weighted import dependency from country workbooks."""
+
+    import os
+    from pathlib import Path
+    from openpyxl import load_workbook
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Expected a JSON object"}), 400
+
+    country = data.get("country")
+
+    workbook_names = {
+        "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
+        "Ghana": "GHANA_FOOD_RESULTS.xlsx",
+        "South Africa": "SOUTH_AFRICA_FOOD_RESULTS.xlsx",
+    }
+
+    food_groups = [
+        "Grains and vegetables",
+        "Meat and eggs",
+        "Edible oil",
+        "Aquatic products",
+        "Fruits",
+        "Sugar",
+        "Dairy",
+        "Alcohol",
+        "Ungrouped / other",
+    ]
+
+    if country not in workbook_names:
+        return jsonify({"error": "Unsupported country"}), 400
+
+    directory = os.environ.get("FOOD_DEMAND_WORKBOOK_DIR")
+
+    if not directory:
+        return jsonify({"error": "Workbook directory not configured"}), 503
+
+    path = Path(directory) / workbook_names[country]
+
+    if not path.is_file():
+        return jsonify({"error": "Country workbook not found"}), 503
+
+    workbook = None
+
+    try:
+        workbook = load_workbook(
+            path, read_only=True, data_only=True
+        )
+        sheet = workbook["TABLE 2 CONSUMPTION"]
+
+        # Confirm the workbook schema before reading values.
+        headers = next(
+            sheet.iter_rows(
+                min_row=3,
+                max_row=3,
+                values_only=True
+            )
+        )
+
+        if (
+            headers[0] != "Product group"
+            or headers[11] != "Import dependency (kcal-weighted)"
+        ):
+            raise ValueError("Unexpected workbook column headers")
+
+        values_by_group = {}
+
+        for row in sheet.iter_rows(min_row=4, values_only=True):
+            name = row[0]
+
+            if isinstance(name, str) and name.strip() in food_groups:
+                raw = row[11] if len(row) > 11 else None
+
+                # Invalid or missing data are not treated as zero.
+                valid = (
+                    isinstance(raw, (int, float))
+                    and not isinstance(raw, bool)
+                    and 0 <= raw <= 1
+                )
+
+                values_by_group[name.strip()] = (
+                    round(raw * 100, 4) if valid else None
+                )
+
+        results = [
+            {
+                "food_group": group,
+                "import_dependency_percent": values_by_group.get(group)
+            }
+            for group in food_groups
+        ]
+
+        return jsonify({
+            "country": country,
+            "year": 2023,
+            "unit": "percent",
+            "food_groups": results,
+        })
+
+    except (OSError, KeyError, ValueError, IndexError, TypeError):
+        app.logger.exception("Unable to read trade exposure")
+        return jsonify({
+            "error": "Unable to read trade exposure data"
+        }), 500
+
+    finally:
+        if workbook is not None:
+            workbook.close()
+
 if __name__ == "__main__":
     # host="0.0.0.0" is required for any non-local deployment (a droplet, a
     # VM, a container) — Flask's default host is 127.0.0.1, which only

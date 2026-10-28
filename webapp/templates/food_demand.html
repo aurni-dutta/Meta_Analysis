@@ -249,6 +249,46 @@ are loaded from the food-demand model workbooks for supported scenarios.
         </p>
       </section>
 
+
+      
+    <section class="card">
+      <h2>Elasticity evidence</h2>
+
+      <p class="subtitle">
+        Food-demand elasticity estimates used in the
+        workbook-based simulations.
+      </p>
+
+      <p id="elasticityStatus"
+        class="caption"
+        role="status"
+        aria-live="polite">
+        Loading elasticity estimates...
+      </p>
+
+      <div class="elasticity-table-wrap">
+        <table class="elasticity-table">
+          <thead>
+            <tr>
+              <th scope="col">Food group</th>
+              <th scope="col">Own-price elasticity</th>
+              <th scope="col">Income elasticity</th>
+              <th scope="col">Baseline supply (g/person/day)</th>
+            </tr>
+          </thead>
+
+          <tbody id="elasticityTableBody"></tbody>
+        </table>
+      </div>
+
+      <p class="caption">
+        Negative own-price elasticities indicate lower modeled
+        demand following a price increase. Missing coefficients
+        are shown as unavailable, not zero.
+      </p>
+    </section>
+
+
       </div>
     </div>
   </main>
@@ -258,5 +298,6 @@ are loaded from the food-demand model workbooks for supported scenarios.
 <script src="{{ url_for('static', filename='js/food_demand_nutrients.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_sources.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_presets.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_elasticities.js') }}"></script>
 </body>
 </html>

@@ -2295,6 +2295,69 @@ def paper_thumbnail(paper_id):
     return send_file(thumb_path, mimetype="image/png")
 
 
+@app.route("/api/food-demand/elasticities", methods=["POST"])
+def food_demand_elasticities():
+    """Return workbook-based elasticity evidence by food group."""
+
+    import os
+    from pathlib import Path
+    from food_demand import load_food_group_data
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Expected a JSON object"}), 400
+
+    country = data.get("country")
+
+    workbook_names = {
+        "Nigeria": "NIGERIA_FOOD_RESULTS.xlsx",
+        "Ghana": "GHANA_FOOD_RESULTS.xlsx",
+        "South Africa": "SOUTH_AFRICA_FOOD_RESULTS.xlsx",
+    }
+
+    food_groups = [
+        "Grains and vegetables",
+        "Meat and eggs",
+        "Edible oil",
+        "Aquatic products",
+        "Fruits",
+        "Sugar",
+        "Dairy",
+        "Alcohol",
+        "Ungrouped / other",
+    ]
+
+    if country not in workbook_names:
+        return jsonify({"error": "Unsupported country"}), 400
+
+    workbook_dir = os.environ.get("FOOD_DEMAND_WORKBOOK_DIR")
+
+    if not workbook_dir:
+        return jsonify({"error": "Workbook directory not configured"}), 503
+
+    workbook_path = Path(workbook_dir) / workbook_names[country]
+
+    if not workbook_path.is_file():
+        return jsonify({"error": "Country workbook not found"}), 503
+
+    try:
+        results = [
+            load_food_group_data(workbook_path, group)
+            for group in food_groups
+        ]
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    except (OSError, KeyError, TypeError):
+        app.logger.exception("Unable to read elasticity evidence")
+        return jsonify({"error": "Unable to read workbook data"}), 500
+
+    return jsonify({
+        "country": country,
+        "food_groups": results,
+    })
+
+
 if __name__ == "__main__":
     # host="0.0.0.0" is required for any non-local deployment (a droplet, a
     # VM, a container) — Flask's default host is 127.0.0.1, which only

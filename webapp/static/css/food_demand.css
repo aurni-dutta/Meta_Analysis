@@ -331,3 +331,39 @@
   margin-bottom: 0;
   font-size: 12px;
 }
+
+
+/* Elasticity evidence table */
+
+.elasticity-table-wrap {
+  overflow-x: auto;
+  margin-top: 18px;
+}
+
+.elasticity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.elasticity-table th,
+.elasticity-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #e4e8f0;
+  text-align: left;
+}
+
+.elasticity-table th {
+  color: #4f5d74;
+  background: #f4f7fc;
+  font-weight: 650;
+}
+
+.elasticity-table td:not(:first-child) {
+  font-variant-numeric: tabular-nums;
+}
+
+.elasticity-table tbody tr:hover {
+  background: #f8faff;
+}
+

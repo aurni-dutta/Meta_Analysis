@@ -109,6 +109,48 @@ are loaded from the food-demand model workbooks for supported scenarios.
         </p>
       </div>
 
+      
+      <div class="dss-summary">
+        <h3>Scenario results at a glance</h3>
+
+        <p id="summaryStatus" class="dss-summary-status"
+          role="status" aria-live="polite">
+          Loading scenario summary...
+        </p>
+
+        <div class="dss-summary-grid">
+          <div class="dss-summary-item">
+            <span>Highlighted food-group baseline</span>
+            <strong id="summaryBaseline">—</strong>
+            <small>g/person/day</small>
+          </div>
+
+          <div class="dss-summary-item">
+            <span>Highlighted food-group prediction</span>
+            <strong id="summaryPredicted">—</strong>
+            <small>g/person/day</small>
+          </div>
+
+          <div class="dss-summary-item">
+            <span>Highlighted food-group change</span>
+            <strong id="summaryFoodChange">—</strong>
+            <small>Percentage change</small>
+          </div>
+
+          <div class="dss-summary-item">
+            <span>National energy supply change</span>
+            <strong id="summaryEnergy">—</strong>
+            <small>Modeled percentage change</small>
+          </div>
+        </div>
+
+        <p class="dss-summary-note">
+          The highlighted food-group result and national energy
+          result have different scopes. The nutrient model aggregates
+          changes across food groups.
+        </p>
+      </div>
+
         <div class="tabs" aria-label="Chart view">
           <button type="button" class="active" data-view="own">Own-price</button>
           <button type="button" data-view="cross">Cross-price</button>
@@ -299,5 +341,6 @@ are loaded from the food-demand model workbooks for supported scenarios.
 <script src="{{ url_for('static', filename='js/food_demand_sources.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_presets.js') }}"></script>
 <script src="{{ url_for('static', filename='js/food_demand_elasticities.js') }}"></script>
+<script src="{{ url_for('static', filename='js/food_demand_summary.js') }}"></script>
 </body>
 </html>

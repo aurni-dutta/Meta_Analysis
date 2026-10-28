@@ -57,6 +57,80 @@
       </p>
     </section>
 
+    
+<section class="chart-card imports-card">
+  <div class="chart-heading">
+    <div>
+      <h2>Imports &amp; Tariffs</h2>
+      <p>Compare workbook import exposure with hypothetical tariff inputs</p>
+    </div>
+
+    <label class="highlight-control">
+      Food group
+      <select id="importsFoodGroup">
+        <option value="Grains and vegetables">Grains and vegetables</option>
+        <option value="Meat and eggs">Meat and eggs</option>
+        <option value="Edible oil">Edible oil</option>
+        <option value="Aquatic products">Aquatic products</option>
+        <option value="Fruits">Fruits</option>
+        <option value="Sugar">Sugar</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Alcohol">Alcohol</option>
+        <option value="Ungrouped / other">Ungrouped / other</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="imports-description">
+    Import dependency comes from each country's 2023 workbook.
+    Enter a hypothetical tariff rate for each country to explore
+    different scenario settings.
+  </p>
+
+  <div class="tariff-inputs">
+    <label>
+      Nigeria tariff (%)
+      <input id="tariffNigeria" type="number"
+             min="0" max="100" step="1" value="10">
+    </label>
+
+    <label>
+      Ghana tariff (%)
+      <input id="tariffGhana" type="number"
+             min="0" max="100" step="1" value="15">
+    </label>
+
+    <label>
+      South Africa tariff (%)
+      <input id="tariffSouthAfrica" type="number"
+             min="0" max="100" step="1" value="20">
+    </label>
+  </div>
+
+  <p id="importsStatus" role="status" aria-live="polite">
+    Loading import dependency data...
+  </p>
+
+  <div class="imports-legend">
+    <span><i class="imports-key"></i> Import dependency (workbook)</span>
+    <span><i class="tariff-key"></i> Tariff (user-entered)</span>
+  </div>
+
+  <div id="importsChart" class="imports-chart"
+       aria-label="Import dependency and hypothetical tariff comparison">
+  </div>
+
+  <p class="source-note">
+    Import dependency is the workbook's kcal-weighted indicator.
+    Tariffs are hypothetical user-entered rates, not observed policy data.
+    Bars below the zero line represent positive tariff inputs,
+    placed downward only to distinguish the two measures visually.
+    They do not represent negative tariffs, estimated price changes,
+    or modeled economic effects. The two indicators are not additive.
+  </p>
+</section>
+
+
     <footer class="showcase-footer">
       <span>Research visualization · Workbook-backed data</span>
       <a href="/food-demand">Return to Food Demand Dashboard</a>
@@ -64,5 +138,6 @@
   </main>
 
   <script src="{{ url_for('static', filename='js/food_demand_showcase.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/food_demand_imports_showcase.js') }}"></script>
 </body>
 </html>

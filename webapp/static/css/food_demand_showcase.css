@@ -244,3 +244,192 @@ h2 {
     flex-direction: column;
   }
 }
+
+
+/* Imports and tariffs mockup */
+
+.imports-card {
+  margin-top: 28px;
+}
+
+.imports-description {
+  color: #68758b;
+  line-height: 1.6;
+}
+
+.tariff-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.tariff-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #536079;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tariff-inputs input {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ccd5e5;
+  border-radius: 9px;
+  font: inherit;
+}
+
+.imports-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+  font-size: 13px;
+  color: #536079;
+}
+
+.imports-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.imports-legend i {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+}
+
+.imports-key {
+  background: #5268d9;
+}
+
+.tariff-key {
+  background: #e3a563;
+}
+
+.imports-chart {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 35px;
+  max-width: 850px;
+  margin: 30px auto;
+}
+
+.imports-country {
+  min-width: 0;
+  text-align: center;
+}
+
+.imports-upper,
+.imports-lower {
+  height: 185px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.imports-upper {
+  justify-content: flex-end;
+}
+
+.imports-lower {
+  justify-content: flex-start;
+}
+
+.imports-zero-line {
+  border-top: 2px solid #9aa9c2;
+  width: 100%;
+}
+
+.imports-bar {
+  width: min(100%, 90px);
+  flex-shrink: 0;
+  transition: height 180ms ease;
+  border-radius: 5px;
+}
+
+.imports-exposure-bar {
+  background: #5268d9;
+}
+
+.imports-tariff-bar {
+  background: #e3a563;
+}
+
+.imports-value {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  color: #344a84;
+}
+
+.imports-upper .imports-value {
+  top: 0;
+}
+
+.imports-lower .imports-value {
+  bottom: 0;
+}
+
+.imports-country-name {
+  margin-top: 14px;
+  font-weight: 800;
+}
+
+@media (max-width: 700px) {
+  .tariff-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .imports-chart {
+    gap: 8px;
+  }
+
+  .imports-bar {
+    width: min(100%, 48px);
+  }
+
+  .imports-upper,
+  .imports-lower {
+    height: 135px;
+  }
+
+  .imports-country-name {
+    font-size: 12px;
+  }
+}
+
+/* Keep import and tariff values close to their bars */
+
+.imports-upper .imports-value {
+  top: auto;
+  bottom: calc(var(--bar-height, 0%) + 8px);
+}
+
+.imports-lower .imports-value {
+  bottom: auto;
+  top: calc(var(--bar-height, 0%) + 8px);
+}
+
+/* Compact Imports & Tariffs chart for report screenshots */
+
+.imports-upper,
+.imports-lower {
+  height: 130px;
+}
+
+.imports-chart {
+  margin: 20px auto;
+}
+
+.imports-country-name {
+  margin-top: 10px;
+  font-size: 15px;
+}

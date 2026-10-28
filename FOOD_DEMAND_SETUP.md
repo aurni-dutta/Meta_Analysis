@@ -72,6 +72,27 @@ FOOD_DEMAND_WORKBOOK_DIR to point to the country workbooks.
 - CSV export
 - Data sources and model assumptions panel
 
+## Trade exposure data provenance
+
+The Trade Exposure chart reads the
+"Import dependency (kcal-weighted)" field from
+column L of the "TABLE 2 CONSUMPTION" worksheet.
+
+Each supported country's worksheet title identifies
+its underlying food-balance data as 2023:
+
+- Nigeria — 2023 (FAO Food Balance Sheet)
+- Ghana — 2023 (FAO Food Balance Sheet)
+- South Africa — 2023 (FAO Food Balance Sheet)
+
+The API converts workbook fractions (0–1) to percentages
+(0–100) for display.
+
+Import dependency is a descriptive exposure indicator.
+It is not a simulated tariff impact, trade-flow forecast,
+or estimate of household food consumption.
+
+
 ## Important modeling notes
 
 The current own-price scenario applies the specified
